@@ -19,18 +19,21 @@ class DatabaseDataSetWriter implements DataSetWriter {
     
     public void write(DataSet ds) {
         def fks = findForeignKeys(ds.tables.keySet())
+        println fks
         def sortedTables = topologicalSort(fks)
-         
-        sql.withBatch {
-            sortedTables.each { tableName ->
-                sql.cacheStatements { 
-                    def table = ds.tables[tableName]
-                    def insertStatement = createInsertStatement(table)
-                    table.each {
-                        sql.executeInsert(insertStatement, it.data);
+        println sortedTables
+        sql.withTransaction{
+            sql.withBatch {
+                sortedTables.each { tableName ->
+                    sql.cacheStatements { 
+                        def table = ds.tables[tableName]
+                        def insertStatement = createInsertStatement(table)
+                        table.each {
+                            sql.executeInsert(insertStatement, it.data);
+                        }
                     }
-                }
-            }    
+                }    
+            }
         }
         
     }
@@ -44,7 +47,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
     
     private String q(String s) {
         if (keywords.contains(s)) {
-            return "${quote}${s}${quote}".toString()
+            return quote + s + quote
         }
         return s
     }
@@ -67,27 +70,25 @@ class DatabaseDataSetWriter implements DataSetWriter {
     static def getKeywords(DatabaseMetaData md) {
         def keywords = [] as Set
         keywords.addAll(md.SQLKeywords.split(','))
-        println keywords
         keywords.addAll(SQL_2K3_KEYWORDS)
         return keywords
         
     }
     
     private Map findForeignKeys(tables) {
+        def fks = tables.collectEntries { [it.toLowerCase(), [] as Set] }
         def metaData = sql.dataSource.connection.metaData
-        return tables.collectEntries {
-            [it, getFksForTable(metaData, it)]
-        }
+        tables.each { addFksForTable(metaData, it, fks) }
+        return fks
     }
     
-    private Set getFksForTable(DatabaseMetaData metaData, tableName) {
-        def rs = metaData.getImportedKeys(null, null, tableName)
-        def fks = [] as Set
+    private void addFksForTable(DatabaseMetaData metaData, tableName, fks) {
+        def rs = metaData.getExportedKeys(null, null, tableName.toUpperCase())
         
         while (rs.next()) {
-            fks << rs.toRowResult()['FKTABLE_NAME']
+            def dependency = rs.toRowResult()['FKTABLE_NAME'].toLowerCase()
+            fks[dependency].add(tableName)
         }
-        return fks
     }
     
     private static final Set<String> SQL_2K3_KEYWORDS = [

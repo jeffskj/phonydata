@@ -1,7 +1,6 @@
 package io.github.phonydata;
 
 import static org.junit.Assert.*
-import groovy.sql.Sql
 
 import javax.sql.DataSource
 
@@ -32,18 +31,38 @@ class DatabaseDataSetWriterTest {
     
     @Test
     void canInsertSimpleDataSet() {
-        def ds = new GroovyDataSet("test(id:1, name: 'joe blow')")
-        def writer = new DatabaseDataSetWriter(createConnection())
+        def ds = new GroovyDataSet("people(id:1, name: 'joe blow')")
+        def writer = new DatabaseDataSetWriter(createDataSource())
+        writer.sql.executeUpdate("create table people(id int primary key, name varchar(255))")
         writer.write(ds)
-        assertEquals(1, writer.sql.rows("select * from test").size())
+        assertEquals(1, writer.sql.rows("select * from people").size())
     }
     
-    private DataSource createConnection() {
-        Class.forName("org.h2.Driver");
-        JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "sa");
-        def sql = new Sql(cp.dataSource)
-        sql.cacheConnection = true
-        sql.executeUpdate("create table test (id int primary key, name varchar(255))")
-        return cp.dataSource
+    @Test
+    void canInsertMoreComplexDataSet() {
+        def ds = new GroovyDataSet(complexDataSet)
+        def writer = new DatabaseDataSetWriter(createDataSource())
+        writer.sql.executeUpdate("create table people(id int primary key, name varchar(255))")
+        writer.sql.executeUpdate("create table address(id int primary key, street varchar(255), city varchar(255), state varchar(2), person int)")
+        writer.sql.executeUpdate("alter table address add foreign key (person) references people(id)")
+        writer.write(ds)
+        
+        assertEquals(100, writer.sql.rows("select * from people").size())
+        assertEquals(200, writer.sql.rows("select * from address").size())
     }
+    
+    private DataSource createDataSource() {
+        return JdbcConnectionPool.create("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "sa").dataSource
+    }
+    
+    private def complexDataSet = '''
+address.id('id')
+people.id('id')
+
+100.times { n ->
+    def person = people(name: 'joe blow' + n)
+    address(street: "$n main st".toString(), city: 'seattle', state: 'wa', person: person)
+    address(street: "$n oak st".toString(), city: 'seattle', state: 'wa', person: person)    
+}
+'''
 }
