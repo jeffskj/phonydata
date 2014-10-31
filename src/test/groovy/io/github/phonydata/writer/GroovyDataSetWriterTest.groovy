@@ -1,4 +1,4 @@
-package io.github.phonydata;
+package io.github.phonydata.writer;
 
 import static org.junit.Assert.*
 import io.github.phonydata.reader.GroovyDataSetReader;

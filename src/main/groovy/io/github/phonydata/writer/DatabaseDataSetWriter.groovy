@@ -1,7 +1,8 @@
-package io.github.phonydata
+package io.github.phonydata.writer
 
 import groovy.sql.Sql
-import io.github.phonydata.writer.DataSetWriter
+import io.github.phonydata.DataSet;
+import io.github.phonydata.Table;
 
 import java.sql.DatabaseMetaData
 

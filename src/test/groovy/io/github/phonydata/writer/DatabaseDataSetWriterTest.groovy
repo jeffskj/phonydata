@@ -1,7 +1,6 @@
 package io.github.phonydata.writer;
 
 import static org.junit.Assert.*
-import io.github.phonydata.DatabaseDataSetWriter
 import io.github.phonydata.reader.GroovyDataSetReader
 
 import javax.sql.DataSource
