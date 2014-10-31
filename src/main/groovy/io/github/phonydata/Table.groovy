@@ -48,6 +48,10 @@ class Table implements Iterable<Row> {
     public Iterator<Row> iterator() {
         return rows.iterator();
     }
+    
+    public int size() {
+        return rows.size()
+    }
 }
 
 class Row {
