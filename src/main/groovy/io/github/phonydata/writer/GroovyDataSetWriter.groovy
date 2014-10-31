@@ -1,4 +1,8 @@
-package io.github.phonydata
+package io.github.phonydata.writer
+
+import io.github.phonydata.DataSet;
+import io.github.phonydata.Row;
+import io.github.phonydata.Table;
 
 
 

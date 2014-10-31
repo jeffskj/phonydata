@@ -1,10 +1,10 @@
-package io.github.phonydata;
+package io.github.phonydata.reader;
 
 import static org.junit.Assert.*
 
 import org.junit.Test
 
-class GroovyDataSetTest {
+class GroovyDataSetReaderTest {
 
     @Test
     public void canParseSimpleDataSet() {
@@ -16,7 +16,7 @@ people(id: 2, name: 'Jane Blow')
 people.each { it.state = 'WA' }
 
 '''
-        def tables = new GroovyDataSet(text).tables
+        def tables = new GroovyDataSetReader(text).read().tables
         
         tables.people.rows.each { println it }
         
@@ -37,7 +37,7 @@ def jane = people(name: 'Jane Blow')
 address(city:'seattle', person:joe)
 address(city:'new york', person:jane)
 '''
-        def tables = new GroovyDataSet(text).tables
+        def tables = new GroovyDataSetReader(text).read().tables
         
         tables.people.rows.each { println it }
         tables.address.rows.each { println it }

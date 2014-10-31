@@ -1,21 +1,24 @@
-package io.github.phonydata;
+package io.github.phonydata.reader;
+
+import io.github.phonydata.DataSet;
+import io.github.phonydata.Table;
 
 
 
-class GroovyDataSet implements DataSet {
+class GroovyDataSetReader implements DataSetReader {
 
-    private Map<String, Table> tables;
+    private InputStream input;
 
-    GroovyDataSet(String text) {
+    GroovyDataSetReader(String text) {
         this(new ByteArrayInputStream(text.bytes))
     }
     
-    GroovyDataSet(InputStream input) {
-        this.tables = parse(input);
+    GroovyDataSetReader(InputStream input) {
+        this.input = input
     }
     
-    Map<String, Table> getTables() {
-        return tables;
+    DataSet read() {
+        return new DataSet(tables: parse(input));
     }
         
     private Map<String, Table> parse(InputStream input) {
@@ -52,6 +55,5 @@ class GroovyDataSet implements DataSet {
         }
         
         def propertyMissing(name) { getTable(name) }
-        
     }
 }

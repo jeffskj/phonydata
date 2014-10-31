@@ -1,5 +1,5 @@
 package io.github.phonydata
 
-interface DataSet {
-    Map<String, Table> getTables()
+class DataSet {
+    Map<String, Table> tables
 }

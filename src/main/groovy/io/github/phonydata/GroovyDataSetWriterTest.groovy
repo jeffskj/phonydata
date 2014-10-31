@@ -1,6 +1,8 @@
 package io.github.phonydata;
 
 import static org.junit.Assert.*
+import io.github.phonydata.reader.GroovyDataSetReader;
+import io.github.phonydata.writer.GroovyDataSetWriter;
 
 import org.junit.Test
 
@@ -8,14 +10,14 @@ class GroovyDataSetWriterTest {
 
     @Test
     public void canWriteReadableGroovyDataSet() {
-        def ds = new GroovyDataSet(dataSet)
+        def ds = new GroovyDataSetReader(dataSet).read()
         def out = new StringWriter()
         def writer = new GroovyDataSetWriter(out)
         writer.write(ds)
         
         println out.toString()
         
-        def read = new GroovyDataSet(out.toString())
+        def read = new GroovyDataSetReader(out.toString()).read()
         assertEquals(ds.tables.size(), read.tables.size())
         assertEquals(ds.tables['address'].rows.size(), read.tables['address'].rows.size())
         assertEquals(ds.tables['people'].rows.size(), read.tables['people'].rows.size())

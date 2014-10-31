@@ -1,6 +1,7 @@
 package io.github.phonydata
 
 import groovy.sql.Sql
+import io.github.phonydata.writer.DataSetWriter
 
 import java.sql.DatabaseMetaData
 
@@ -10,11 +11,13 @@ class DatabaseDataSetWriter implements DataSetWriter {
     private Sql sql
     private String quote
     private Set<String> keywords
+    private boolean clean
     
-    DatabaseDataSetWriter(DataSource dataSource) {
+    DatabaseDataSetWriter(DataSource dataSource, boolean clean) {
         sql = new Sql(dataSource)
         quote = dataSource.connection.metaData.identifierQuoteString
         keywords = getKeywords(dataSource.connection.metaData)
+        this.clean = clean
     }
     
     public void write(DataSet ds) {
@@ -24,6 +27,12 @@ class DatabaseDataSetWriter implements DataSetWriter {
         println sortedTables
         sql.withTransaction{
             sql.withBatch {
+                if (clean) {
+                    sortedTables.reverse().each {
+                        sql.executeUpdate('delete from ' + it)
+                    }
+                }
+                
                 sortedTables.each { tableName ->
                     sql.cacheStatements { 
                         def table = ds.tables[tableName]

@@ -1,6 +1,8 @@
-package io.github.phonydata;
+package io.github.phonydata.writer;
 
 import static org.junit.Assert.*
+import io.github.phonydata.DatabaseDataSetWriter
+import io.github.phonydata.reader.GroovyDataSetReader
 
 import javax.sql.DataSource
 
@@ -31,8 +33,8 @@ class DatabaseDataSetWriterTest {
     
     @Test
     void canInsertSimpleDataSet() {
-        def ds = new GroovyDataSet("people(id:1, name: 'joe blow')")
-        def writer = new DatabaseDataSetWriter(createDataSource())
+        def ds = new GroovyDataSetReader("people(id:1, name: 'joe blow')").read()
+        def writer = new DatabaseDataSetWriter(createDataSource(), false)
         writer.sql.executeUpdate("create table people(id int primary key, name varchar(255))")
         writer.write(ds)
         assertEquals(1, writer.sql.rows("select * from people").size())
@@ -40,8 +42,8 @@ class DatabaseDataSetWriterTest {
     
     @Test
     void canInsertMoreComplexDataSet() {
-        def ds = new GroovyDataSet(complexDataSet)
-        def writer = new DatabaseDataSetWriter(createDataSource())
+        def ds = new GroovyDataSetReader(complexDataSet).read()
+        def writer = new DatabaseDataSetWriter(createDataSource(), true)
         writer.sql.executeUpdate("create table people(id int primary key, name varchar(255))")
         writer.sql.executeUpdate("create table address(id int primary key, street varchar(255), city varchar(255), state varchar(2), person int)")
         writer.sql.executeUpdate("alter table address add foreign key (person) references people(id)")
@@ -52,7 +54,7 @@ class DatabaseDataSetWriterTest {
     }
     
     private DataSource createDataSource() {
-        return JdbcConnectionPool.create("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "sa").dataSource
+        return JdbcConnectionPool.create("jdbc:h2:mem:test${UUID.randomUUID()};DB_CLOSE_DELAY=-1", "sa", "sa").dataSource
     }
     
     private def complexDataSet = '''
