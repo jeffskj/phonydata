@@ -19,7 +19,7 @@ public abstract class PhonyData {
         writer.write(reader.read())
     }
     
-    public static void readInto(DataSource src, Collection<String> tables, OutputStream dest) {
+    public static void readFrom(DataSource src, Collection<String> tables, OutputStream dest) {
         def reader = new DatabaseDataSetReader(src, tables)
         def writer = new GroovyDataSetWriter(dest)
         writer.write(reader.read())
