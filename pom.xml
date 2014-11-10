@@ -20,7 +20,11 @@
 
 	<groupId>io.github.phonydata</groupId>
 	<artifactId>phonydata</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>${phonydata.version}</version>
+
+    <properties>
+        <phonydata.version>1.0-SNAPSHOT</phonydata.version>
+    </properties>
 
 	<url>http://jeffskj.github.io/phonydata</url>
 	<description>A fake data library</description>
