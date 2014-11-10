@@ -54,3 +54,14 @@ Usage Example
     
     // reads the data from specified tables and writes a groovy dataset to output stream
     PhonyData.readFrom(datasource, ['table1','table2'], new File('/some/file').newOutputStream())
+
+Get It!
+-------
+
+Add this dependency to your project:
+
+    <dependency>
+       <groupId>io.github.phonydata</groupId>
+       <artifactId>phonydata</artifactId>
+       <version>0.1</version>
+    </dependency>
