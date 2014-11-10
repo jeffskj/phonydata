@@ -12,11 +12,19 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
+
 	<groupId>io.github.phonydata</groupId>
 	<artifactId>phonydata</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
+	<url>http://jeffskj.github.io/phonydata</url>
 	<description>A fake data library</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
@@ -50,8 +58,6 @@
 						<artifactId>groovy-eclipse-compiler</artifactId>
 						<version>2.8.0-01</version>
 					</dependency>
-					<!-- for 2.8.0-01 and later you must have an explicit dependency on 
-						groovy-eclipse-batch -->
 					<dependency>
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy-eclipse-batch</artifactId>
@@ -66,6 +72,42 @@
 				<extensions>true</extensions>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.4.2</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Jeff Skjonsby</name>
+			<email>jeff_skj@hotmail.com</email>
+			<organization>none</organization>
+			<organizationUrl>https://github.com/jeffskj</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:jeffskj/phonydata.git</connection>
+		<developerConnection>scm:git:git@github.com:jeffskj/phonydata.git</developerConnection>
+		<url>git@github.com:jeffskj/phonydata.git</url>
+	</scm>
 
 </project>
