@@ -1,6 +1,8 @@
 PhonyData
 =========
 
+[![Build Status](https://travis-ci.org/jeffskj/phonydata.svg?branch=master)](https://travis-ci.org/jeffskj/phonydata)
+
 PhonyData is a library to import and export test datasets for things like unit testing databases or local dev data. 
 
 Features
