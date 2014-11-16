@@ -16,6 +16,7 @@ Features
   * Specify default column values
   * ID auto generation
   * Row references
+  * Define dataset inline in groovy tests 
 
 DSL Overview
 ------------
@@ -54,3 +55,15 @@ Usage Example
     
     // reads the data from specified tables and writes a groovy dataset to output stream
     PhonyData.readFrom(datasource, ['table1','table2'], new File('/some/file').newOutputStream())
+
+    
+Inline Groovy Example
+---------------------
+
+     @Before
+     public void setup() {     
+        PhonyData.readInto(dataSource) {
+            people(name: 'Jane Doe')
+            address(street: '123 main st')
+        }
+    }

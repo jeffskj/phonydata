@@ -1,7 +1,7 @@
 package io.github.phonydata.reader;
 
-import io.github.phonydata.DataSet;
-import io.github.phonydata.Table;
+import io.github.phonydata.DataSet
+import io.github.phonydata.Table
 
 
 
@@ -46,14 +46,5 @@ class GroovyDataSetReader implements DataSetReader {
         script.run()
         
         return tables
-    }
-    
-    static abstract class DataSetBuilder extends Script {
-        def methodMissing(name, args) {
-            println args
-            return getTable(name).addRow(args)
-        }
-        
-        def propertyMissing(name) { getTable(name) }
     }
 }
