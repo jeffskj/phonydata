@@ -1,8 +1,8 @@
 package io.github.phonydata.writer
 
-import io.github.phonydata.DataSet;
-import io.github.phonydata.Row;
-import io.github.phonydata.Table;
+import io.github.phonydata.DataSet
+import io.github.phonydata.Row
+import io.github.phonydata.Table
 
 
 
@@ -26,6 +26,7 @@ class GroovyDataSetWriter implements DataSetWriter {
             }        
             out.println()
         }
+        out.flush()
     }
     
     private String toValue(Object o) {
