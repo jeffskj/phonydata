@@ -17,6 +17,8 @@ Features
   * ID auto generation
   * Row references
   * Define dataset inline in groovy tests 
+  * Concise builder pattern to import/export data
+  * Reads DBUnit FlatXml datasets for compatibility
 
 DSL Overview
 ------------
@@ -51,10 +53,10 @@ Usage Example
     
     DataSource datasource = ... // get reference to JDBC DataSource
     def dataset = getClass().classLoader.getResourceAsStream('/path/to/dataset') // may also be a String
-    PhonyData.readInto(dataset, datasource) // reads data from groovy dataset and writes to datasource
+    PhonyData.from(dataset).into(datasource) // reads data from groovy dataset and writes to datasource
     
     // reads the data from specified tables and writes a groovy dataset to output stream
-    PhonyData.readFrom(datasource, ['table1','table2'], new File('/some/file').newOutputStream())
+    PhonyData.from(datasource, ['table1','table2']).into(new File('/some/file').newOutputStream())
 
    
 Inline Groovy Example
@@ -62,10 +64,10 @@ Inline Groovy Example
 
      @Before
      public void setup() {     
-        PhonyData.readInto(dataSource) {
+        PhonyData.from {
             people(name: 'Jane Doe')
             address(street: '123 main st')
-        }
+        }.into(dataSource)
     }
 
 Get It!
@@ -76,5 +78,5 @@ Add this dependency to your project:
     <dependency>
        <groupId>io.github.phonydata</groupId>
        <artifactId>phonydata</artifactId>
-       <version>0.1</version>
+       <version>0.2</version>
     </dependency>
