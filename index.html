@@ -34,6 +34,8 @@
         <h1>
 <a id="phonydata" class="anchor" href="#phonydata" aria-hidden="true"><span class="octicon octicon-link"></span></a>PhonyData</h1>
 
+<p><a href="https://travis-ci.org/jeffskj/phonydata"><img src="https://travis-ci.org/jeffskj/phonydata.svg?branch=master" alt="Build Status"></a></p>
+
 <p>PhonyData is a library to import and export test datasets for things like unit testing databases or local dev data. </p>
 
 <h2>
@@ -48,6 +50,9 @@
 <li>Specify default column values</li>
 <li>ID auto generation</li>
 <li>Row references</li>
+<li>Define dataset inline in groovy tests </li>
+<li>Concise builder pattern to import/export data</li>
+<li>Reads DBUnit FlatXml datasets for compatibility</li>
 </ul>
 
 <h2>
@@ -90,10 +95,34 @@ people(name: 'Jane Doe')
 
 <pre><code>DataSource datasource = ... // get reference to JDBC DataSource
 def dataset = getClass().classLoader.getResourceAsStream('/path/to/dataset') // may also be a String
-PhonyData.readInto(dataset, datasource) // reads data from groovy dataset and writes to datasource
+PhonyData.from(dataset).into(datasource) // reads data from groovy dataset and writes to datasource
 
 // reads the data from specified tables and writes a groovy dataset to output stream
-PhonyData.readFrom(datasource, ['table1','table2'], new File('/some/file').newOutputStream())
+PhonyData.from(datasource, ['table1','table2']).into(new File('/some/file').newOutputStream())
+</code></pre>
+
+<h2>
+<a id="inline-groovy-example" class="anchor" href="#inline-groovy-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Inline Groovy Example</h2>
+
+<pre><code> @Before
+ public void setup() {     
+    PhonyData.from {
+        people(name: 'Jane Doe')
+        address(street: '123 main st')
+    }.into(dataSource)
+}
+</code></pre>
+
+<h2>
+<a id="get-it" class="anchor" href="#get-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get It!</h2>
+
+<p>Add this dependency to your project:</p>
+
+<pre><code>&lt;dependency&gt;
+   &lt;groupId&gt;io.github.phonydata&lt;/groupId&gt;
+   &lt;artifactId&gt;phonydata&lt;/artifactId&gt;
+   &lt;version&gt;0.2&lt;/version&gt;
+&lt;/dependency&gt;
 </code></pre>
       </section>
     </div>
