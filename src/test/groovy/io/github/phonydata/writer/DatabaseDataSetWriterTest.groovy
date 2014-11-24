@@ -43,9 +43,13 @@ class DatabaseDataSetWriterTest {
     void canInsertMoreComplexDataSet() {
         def ds = new GroovyDataSetReader(complexDataSet).read()
         def writer = new DatabaseDataSetWriter(createDataSource(), true)
+        writer.sql.executeUpdate("create table unused(id int primary key, person int)")
+        
         writer.sql.executeUpdate("create table people(id int primary key, name varchar(255))")
         writer.sql.executeUpdate("create table address(id int primary key, street varchar(255), city varchar(255), state varchar(2), person int)")
+        
         writer.sql.executeUpdate("alter table address add foreign key (person) references people(id)")
+        writer.sql.executeUpdate("alter table unused add foreign key (person) references people(id)")
         writer.write(ds)
         
         assertEquals(100, writer.sql.rows("select * from people").size())

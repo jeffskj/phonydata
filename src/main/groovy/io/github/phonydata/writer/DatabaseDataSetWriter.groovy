@@ -1,8 +1,8 @@
 package io.github.phonydata.writer
 
 import groovy.sql.Sql
-import io.github.phonydata.DataSet;
-import io.github.phonydata.Table;
+import io.github.phonydata.DataSet
+import io.github.phonydata.Table
 
 import java.sql.DatabaseMetaData
 
@@ -97,6 +97,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
         
         while (rs.next()) {
             def dependency = rs.toRowResult()['FKTABLE_NAME'].toLowerCase()
+            if (fks[dependency] == null) { continue }
             fks[dependency].add(tableName)
         }
     }
