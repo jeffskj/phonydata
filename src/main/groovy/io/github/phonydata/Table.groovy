@@ -59,7 +59,7 @@ class Row {
     Map<String, Object> data
     
     Set<String> getColumns() { table.columns } 
-    def propertyMissing(name) { val(data[name] ?: table.defaults[name]) }
+    def propertyMissing(name) { val(data.containsKey(name) ? data[name] : table.defaults[name]) }
     
     def propertyMissing(name, value) { 
         data[name] = value

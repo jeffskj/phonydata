@@ -11,7 +11,7 @@ class TableTest {
         Table t = new Table(name: 'my_table')
         
         t.addRow(foo: 'test', bar: 'foo')
-        t.addRow(baz: 'x')
+        t.addRow(baz: false)
         t.addRow(yomama: 'sofat')
         
         t.defaults(bar: 'def-bar', blah:'zzz')
@@ -29,6 +29,7 @@ class TableTest {
         
         assertEquals('test', data[0].foo)
         assertEquals('foo', data[0].bar)
+        assertFalse(data[1].baz)
         assertNull(data[1].foo)
         assertNull(data[1].yomama)
     }
