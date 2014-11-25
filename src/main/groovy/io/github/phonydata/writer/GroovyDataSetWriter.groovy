@@ -7,6 +7,7 @@ import io.github.phonydata.Table
 
 
 
+
 class GroovyDataSetWriter implements DataSetWriter {
     
     private PrintWriter out;
@@ -22,8 +23,8 @@ class GroovyDataSetWriter implements DataSetWriter {
     public void write(DataSet ds) {
         ds.tables.values().each { Table t ->
             t.rows.each { Row r ->
-                def nonNullcols = r.data.findAll { it.value != null }
-                def cols = nonNullcols.collect { n, v -> "${n}:${toValue(v)}" }.join(',')
+                def cols = r.data.findAll { it.value != null }
+                                 .collect { n, v -> "${n}:${toValue(v)}" }.join(',')
                 out.println("${t.name}(${cols})")
             }        
             out.println()

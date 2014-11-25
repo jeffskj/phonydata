@@ -33,5 +33,8 @@ class GroovyDataSetWriterTest {
         assertEquals(ds.tables.size(), read.tables.size())
         assertEquals(ds.tables['address'].rows.size(), read.tables['address'].rows.size())
         assertEquals(ds.tables['people'].rows.size(), read.tables['people'].rows.size())
+        assertEquals(50, ds.tables['people'].rows.findAll { it.data.active == true }.size())
+        assertEquals(50, ds.tables['people'].rows.findAll { it.data.active == false }.size())
+        
     }
 }
