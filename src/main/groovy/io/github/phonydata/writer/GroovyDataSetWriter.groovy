@@ -1,5 +1,6 @@
 package io.github.phonydata.writer
 
+import groovy.json.StringEscapeUtils
 import io.github.phonydata.DataSet
 import io.github.phonydata.Row
 import io.github.phonydata.Table
@@ -21,7 +22,8 @@ class GroovyDataSetWriter implements DataSetWriter {
     public void write(DataSet ds) {
         ds.tables.values().each { Table t ->
             t.rows.each { Row r ->
-                def cols = r.data.findAll { it.value != null }.collect { n, v -> "${n}:${toValue(v)}" }.join(',')
+                def nonNullcols = r.data.findAll { it.value != null }
+                def cols = nonNullcols.collect { n, v -> "${n}:${toValue(v)}" }.join(',')
                 out.println("${t.name}(${cols})")
             }        
             out.println()
@@ -32,7 +34,7 @@ class GroovyDataSetWriter implements DataSetWriter {
     private String toValue(Object o) {
         switch (o) {
             case Number: return o.toString()
-            case CharSequence: return "'$o'"
+            case CharSequence: return "\"${StringEscapeUtils.escapeJava(o)}\""
             case Boolean: return o.toString() 
             case Date: return "new Date(${o.time})"
         }

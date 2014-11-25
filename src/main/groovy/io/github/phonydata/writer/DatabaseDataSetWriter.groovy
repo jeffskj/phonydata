@@ -11,32 +11,30 @@ import javax.sql.DataSource
 class DatabaseDataSetWriter implements DataSetWriter {
     private Sql sql
     private String quote
-    private Set<String> keywords
     private boolean clean
     
     DatabaseDataSetWriter(DataSource dataSource, boolean clean) {
         sql = new Sql(dataSource)
         quote = dataSource.connection.metaData.identifierQuoteString
-        keywords = getKeywords(dataSource.connection.metaData)
         this.clean = clean
     }
     
     public void write(DataSet ds) {
         def fks = findForeignKeys(ds.tables.keySet())
-        println fks
         def sortedTables = topologicalSort(fks)
-        println sortedTables
+        def originalNames = ds.tables.keySet().collectEntries { [it.toLowerCase(), it] }
+        
         sql.withTransaction{
             sql.withBatch {
                 if (clean) {
                     sortedTables.reverse().each {
-                        sql.executeUpdate('delete from ' + it)
+                        sql.executeUpdate('delete from ' + originalNames[it])
                     }
                 }
                 
                 sortedTables.each { tableName ->
                     sql.cacheStatements { 
-                        def table = ds.tables[tableName]
+                        def table = ds.tables[originalNames[tableName]]
                         def insertStatement = createInsertStatement(table)
                         table.each {
                             sql.executeInsert(insertStatement, it.data);
@@ -56,10 +54,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
     }
     
     private String q(String s) {
-        if (keywords.contains(s)) {
-            return quote + s + quote
-        }
-        return s
+        return quote + s.toUpperCase() + quote
     }
     
     static def topologicalSort(Map fks) {
@@ -67,7 +62,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
         def counter = fks.size()
         while (!fks.isEmpty()) {
             if (counter-- < 0) { //TODO: consider warning then just throwing the rest in the sorted list
-                throw new IllegalStateException("unable to topologically sort cyclical table references!")
+                throw new IllegalStateException("unable to topologically sort cyclical table references!\n${fks}")
             }
             def unReferenced = fks.findAll { t, refs -> refs.isEmpty() }.keySet()
             sorted.addAll(unReferenced)
@@ -77,18 +72,10 @@ class DatabaseDataSetWriter implements DataSetWriter {
         return sorted
     }
     
-    static def getKeywords(DatabaseMetaData md) {
-        def keywords = [] as Set
-        keywords.addAll(md.SQLKeywords.split(','))
-        keywords.addAll(SQL_2K3_KEYWORDS)
-        return keywords
-        
-    }
-    
-    private Map findForeignKeys(tables) {
-        def fks = tables.collectEntries { [it.toLowerCase(), [] as Set] }
+    private Map findForeignKeys(tableNames) {
+        def fks = tableNames.collectEntries { [it.toLowerCase(), [] as Set] }
         def metaData = sql.dataSource.connection.metaData
-        tables.each { addFksForTable(metaData, it, fks) }
+        tableNames.each { addFksForTable(metaData, it, fks) }
         return fks
     }
     
@@ -98,29 +85,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
         while (rs.next()) {
             def dependency = rs.toRowResult()['FKTABLE_NAME'].toLowerCase()
             if (fks[dependency] == null) { continue }
-            fks[dependency].add(tableName)
+            fks[dependency].add(tableName.toLowerCase())
         }
     }
-    
-    private static final Set<String> SQL_2K3_KEYWORDS = [
-        'ADD','ALL','ALLOCATE','ALTER','AND','ANY','ARE','ARRAY','AS','ASENSITIVE','ASYMMETRIC','AT','ATOMIC',
-        'AUTHORIZATION','BEGIN','BETWEEN','BIGINT','BINARY','BLOB','BOOLEAN','BOTH','BY','CALL','CALLED','CASCADED',
-        'CASE','CAST','CHAR','CHARACTER','CHECK','CLOB','CLOSE','COLLATE','COLUMN','COMMIT','CONNECT','CONSTRAINT',
-        'CONTINUE','CORRESPONDING','CREATE','CROSS','CUBE','CURRENT','CURRENT_DATE','CURRENT_DEFAULT_TRANSFORM_GROUP',
-        'CURRENT_PATH','CURRENT_ROLE','CURRENT_TIME','CURRENT_TIMESTAMP','CURRENT_TRANSFORM_GROUP_FOR_TYPE','CURRENT_USER',
-        'CURSOR','CYCLE','DATE','DAY','DEALLOCATE','DEC','DECIMAL','DECLARE','DEFAULT','DELETE','DEREF','DESCRIBE',
-        'DETERMINISTIC','DISCONNECT','DISTINCT','DOUBLE','DROP','DYNAMIC','EACH','ELEMENT','ELSE','END','END','EXEC',
-        'ESCAPE','EXCEPT','EXEC','EXECUTE','EXISTS','EXTERNAL','FALSE','FETCH','FILTER','FLOAT','FOR','FOREIGN','FREE','FROM',
-        'INNER','INOUT','INPUT','INSENSITIVE','INSERT','INT','INTEGER','INTERSECT','INTERVAL','INTO','IS','ISOLATION','JOIN',
-        'LANGUAGE','LARGE','LATERAL','LEADING','LEFT','LIKE','LOCAL','LOCALTIME','LOCALTIMESTAMP','MATCH','MEMBER','MERGE',
-        'METHOD','MINUTE','MODIFIES','MODULE','MONTH','MULTISET','NATIONAL','NATURAL','NCHAR','NCLOB','NEW','NO','NONE','NOT',
-        'NULL','NUMERIC','OF','OLD','ON','ONLY','OPEN','OR','ORDER','OUT','OUTER','OUTPUT','OVER','OVERLAPS','PARAMETER',
-        'PARTITION','PRECISION','PREPARE','PRIMARY','PROCEDURE','RANGE','READS','REAL','RECURSIVE','REF','REFERENCES',
-        'REFERENCING','REGR_AVGX','REGR_AVGY','REGR_COUNT','REGR_INTERCEPT','REGR_R2','REGR_SLOPE','REGR_SXX','REGR_SXY',
-        'REGR_SYY','RELEASE','RESULT','RETURN','RETURNS','REVOKE','RIGHT','ROLLBACK','ROLLUP','ROW','ROWS','SAVEPOINT','SCROLL',
-        'SEARCH','SECOND','SELECT','SENSITIVE','SESSION_USER','SET','SIMILAR','SMALLINT','SOME','SPECIFIC','SPECIFICTYPE','SQL',
-        'SQLEXCEPTION','SQLSTATE','SQLWARNING','START','STATIC','SUBMULTISET','SYMMETRIC','SYSTEM','SYSTEM_USER','TABLE','THEN',
-        'TIME','TIMESTAMP','TIMEZONE_HOUR','TIMEZONE_MINUTE','TO','TRAILING','TRANSLATION','TREAT','TRIGGER','TRUE','UESCAPE','UNION',
-        'UNIQUE','UNKNOWN','UNNEST','UPDATE','UPPER','USER','USING','VALUE','VALUES','VAR_POP','VAR_SAMP','VARCHAR','VARYING','WHEN',
-        'WHENEVER','WHERE','WIDTH_BUCKET','WINDOW','WITH','WITHIN','WITHOUT','YEAR'] as Set
 }
