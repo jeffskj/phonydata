@@ -12,12 +12,12 @@ class PhonyDataTest {
 
     @Test
     public void testFromClosure() {
-        assertDataWritten(PhonyData.from { table1(col1:'blah') })
+        assertDataWritten(PhonyData.from { table1(col1:'blah') }.andFrom((String)null))
     }
 
     @Test
     public void testFromString() {
-        assertDataWritten(PhonyData.from("table1(col1:'blah')"))
+        assertDataWritten(PhonyData.from("table1(col1:'blah')").andFrom { table1(col2: 'blah') })
     }
 
     @Test

@@ -12,30 +12,70 @@ import javax.sql.DataSource
 
 public class PhonyData {
 
-    private DataSetReader reader
+    private List<DataSetReader> readers
     
     public static PhonyData from(Closure clos) {
-        return new PhonyData(reader: new GroovyClosureDataSetReader(clos)) 
+        return new PhonyData(readers: clos ? [new GroovyClosureDataSetReader(clos)] : []) 
     }
     
     public static PhonyData from(String groovyDataset) {
-        return new PhonyData(reader: new GroovyDataSetReader(groovyDataset))
+        return new PhonyData(readers: groovyDataset ? [new GroovyDataSetReader(groovyDataset)] : [])
     }
     
     public static PhonyData from(InputStream groovyDataset) {
-        return new PhonyData(reader: new GroovyDataSetReader(groovyDataset))
+        return new PhonyData(readers: groovyDataset ? [new GroovyDataSetReader(groovyDataset)] : [])
     }
     
     public static PhonyData fromXml(String flatXml) {
-        return new PhonyData(reader: new FlatXmlDataSetReader(flatXml))
+        return new PhonyData(readers: flatXml ? [new FlatXmlDataSetReader(flatXml)] : [])
     }
     
     public static PhonyData fromXml(InputStream flatXml) {
-        return new PhonyData(reader: new FlatXmlDataSetReader(flatXml))
+        return new PhonyData(readers: flatXml ? [new FlatXmlDataSetReader(flatXml)] : [])
     }
     
     public static PhonyData from(DataSource ds, Collection<String> tables) {
-        return new PhonyData(reader: new DatabaseDataSetReader(ds, tables))
+        return new PhonyData(readers: [new DatabaseDataSetReader(ds, tables)])
+    }
+    
+    public PhonyData andFrom(Closure clos) {
+        if (clos) {
+            readers << new GroovyClosureDataSetReader(clos)
+        }
+        return this
+    }
+    
+    public PhonyData andFrom(String groovyDataset) {
+        if (groovyDataset) {
+            readers << new GroovyDataSetReader(groovyDataset)
+        }
+        return this
+    }
+    
+    public PhonyData andFrom(InputStream groovyDataset) {
+        if (groovyDataset) {
+            readers << new GroovyDataSetReader(groovyDataset)
+        }
+        return this
+    }
+    
+    public PhonyData andFromXml(String flatXml) {
+        if (flatXml) {
+            readers << new FlatXmlDataSetReader(flatXml)
+        }
+        return this
+    }
+    
+    public PhonyData andFromXml(InputStream flatXml) {
+        if (flatXml) {
+            readers << new FlatXmlDataSetReader(flatXml)
+        }
+        return this
+    }
+    
+    public PhonyData andFrom(DataSource ds, Collection<String> tables) {
+        readers << new DatabaseDataSetReader(ds, tables)
+        return this
     }
     
     public void into(DataSource dest) {
@@ -43,12 +83,16 @@ public class PhonyData {
     }
 
     public void into(DataSource dest, boolean clean) {
-        def writer = new DatabaseDataSetWriter(dest, clean)
-        writer.write(reader.read())
+        readers.each { reader ->
+            def writer = new DatabaseDataSetWriter(dest, clean)
+            writer.write(reader.read())
+        }
     }
 
     public void into(OutputStream dest) {
-        def writer = new GroovyDataSetWriter(dest)
-        writer.write(reader.read())
+        readers.each { reader ->
+            def writer = new GroovyDataSetWriter(dest)
+            writer.write(reader.read())
+        }
     }
 }
