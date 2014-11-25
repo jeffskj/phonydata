@@ -5,7 +5,12 @@ import io.github.phonydata.Table
 
 import java.text.ParseException
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class FlatXmlDataSetReader implements DataSetReader {
+    private Logger logger = LoggerFactory.getLogger(getClass())
+    
     private InputStream input;
     
     FlatXmlDataSetReader(String text) {
@@ -35,6 +40,8 @@ class FlatXmlDataSetReader implements DataSetReader {
         xml.children().each {
             getTable(it.name()).addRow(it.attributes().collectEntries { n, v -> [n, convert(v)] })
         }
+        
+        logger.info ("read flatxml dataset with {} tables and {} total rows", tables.size(), tables.values().sum { it.rows.size() })
         
         return tables
     }

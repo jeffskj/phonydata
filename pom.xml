@@ -24,6 +24,7 @@
 
     <properties>
         <phonydata.version>99999-SNAPSHOT</phonydata.version>
+        <slf4j.version>1.7.7</slf4j.version>
     </properties>
 
 	<url>http://jeffskj.github.io/phonydata</url>
@@ -35,6 +36,17 @@
 			<artifactId>groovy-all</artifactId>
 			<version>2.3.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>        
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>

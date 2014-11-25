@@ -8,7 +8,12 @@ import java.sql.DatabaseMetaData
 
 import javax.sql.DataSource
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class DatabaseDataSetWriter implements DataSetWriter {
+    private static Logger logger = LoggerFactory.getLogger(DatabaseDataSetWriter)
+    
     private Sql sql
     private String quote
     private boolean clean
@@ -27,6 +32,7 @@ class DatabaseDataSetWriter implements DataSetWriter {
         sql.withTransaction{
             sql.withBatch {
                 if (clean) {
+                    logger.info("deleting data from table {}", originalNames[it])
                     sortedTables.reverse().each {
                         sql.executeUpdate('delete from ' + originalNames[it])
                     }
@@ -39,6 +45,8 @@ class DatabaseDataSetWriter implements DataSetWriter {
                         table.each {
                             sql.executeInsert(insertStatement, it.data);
                         }
+                        
+                        logger.info("inserted {} rows into {}", table.rows.size(), table.name)
                     }
                 }    
             }
@@ -62,7 +70,8 @@ class DatabaseDataSetWriter implements DataSetWriter {
         def counter = fks.size()
         while (!fks.isEmpty()) {
             if (counter-- < 0) { //TODO: consider warning then just throwing the rest in the sorted list
-                throw new IllegalStateException("unable to topologically sort cyclical table references!\n${fks}")
+                logger.error("unable to sort dataset with circular table references: {}", fks)
+                throw new IllegalStateException("unable to topologically sort cyclical table references!")
             }
             def unReferenced = fks.findAll { t, refs -> refs.isEmpty() }.keySet()
             sorted.addAll(unReferenced)
@@ -84,7 +93,10 @@ class DatabaseDataSetWriter implements DataSetWriter {
         
         while (rs.next()) {
             def dependency = rs.toRowResult()['FKTABLE_NAME'].toLowerCase()
-            if (fks[dependency] == null) { continue }
+            if (fks[dependency] == null) {
+                logger.debug("skipping fk reference to unknown table {} -> {}", tableName, dependency) 
+                continue 
+            }
             fks[dependency].add(tableName.toLowerCase())
         }
     }

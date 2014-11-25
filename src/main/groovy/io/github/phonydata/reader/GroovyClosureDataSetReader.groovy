@@ -3,7 +3,11 @@ package io.github.phonydata.reader;
 import io.github.phonydata.DataSet
 import io.github.phonydata.Table
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class GroovyClosureDataSetReader implements DataSetReader {
+    private Logger logger = LoggerFactory.getLogger(getClass())
 
     private Closure closure;
 
@@ -19,6 +23,9 @@ class GroovyClosureDataSetReader implements DataSetReader {
         def delegate = new Delegate()
         closure.delegate = delegate
         closure()
+        
+        logger.info ("read groovy closure dataset with {} tables and {} total rows", 
+            delegate.tables.size(), delegate.tables.values().sum { it.rows.size() })
         
         return delegate.tables
     }

@@ -3,10 +3,14 @@ package io.github.phonydata.reader;
 import io.github.phonydata.DataSet
 import io.github.phonydata.Table
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 
 
 class GroovyDataSetReader implements DataSetReader {
-
+    private Logger logger = LoggerFactory.getLogger(getClass())
+    
     private InputStream input;
 
     GroovyDataSetReader(String text) {
@@ -44,6 +48,8 @@ class GroovyDataSetReader implements DataSetReader {
         script.metaClass.propertyMissing = { getTable(it) }
         
         script.run()
+        
+        logger.info ("read groovy dataset with {} tables and {} total rows", tables.size(), tables.values().sum { it.rows.size() })
         
         return tables
     }
