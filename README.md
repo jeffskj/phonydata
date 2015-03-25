@@ -3,7 +3,7 @@ PhonyData
 
 [![Build Status](https://travis-ci.org/jeffskj/phonydata.svg?branch=master)](https://travis-ci.org/jeffskj/phonydata)
 
-PhonyData is a library to import and export test datasets for things like unit testing databases or local dev data. 
+PhonyData is a library to import and export test datasets for things like unit testing databases or local dev data.
 
 Features
 --------
@@ -16,7 +16,7 @@ Features
   * Specify default column values
   * ID auto generation
   * Row references
-  * Define dataset inline in groovy tests 
+  * Define dataset inline in groovy tests
   * Concise builder pattern to import/export data
   * Reads DBUnit FlatXml datasets for compatibility
 
@@ -31,39 +31,39 @@ DSL Example
 -----------
 
     // specify id columns
-    address.id('id') 
+    address.id('id')
     people.id('id')
-    
+
     // specify columns that will be the same for all rows
     people.defaults(birthday: new Date())
-    
+
     people(name: 'Jane Doe')
-    
+
     100.times { n ->
         def person = people(name: 'joe blow' + n) // returns reference to row which will be de-referenced by id
-        
-        address(street: "$n main st".toString(), city: 'seattle', state: 'wa', 
+
+        address(street: "$n main st".toString(), city: 'seattle', state: 'wa',
                 person: person /* holds actual value of person.id */)
-                
-        address(street: "$n oak st".toString(), city: 'seattle', state: 'wa', person: person)    
+
+        address(street: "$n oak st".toString(), city: 'seattle', state: 'wa', person: person)
     }
-    
+
 Usage Example
 -------------
-    
+
     DataSource datasource = ... // get reference to JDBC DataSource
     def dataset = getClass().classLoader.getResourceAsStream('/path/to/dataset') // may also be a String
     PhonyData.from(dataset).into(datasource) // reads data from groovy dataset and writes to datasource
-    
+
     // reads the data from specified tables and writes a groovy dataset to output stream
     PhonyData.from(datasource, ['table1','table2']).into(new File('/some/file').newOutputStream())
 
-   
+
 Inline Groovy Example
 ---------------------
 
      @Before
-     public void setup() {     
+     public void setup() {
         PhonyData.from {
             people(name: 'Jane Doe')
             address(street: '123 main st')
@@ -78,5 +78,5 @@ Add this dependency to your project:
     <dependency>
        <groupId>io.github.phonydata</groupId>
        <artifactId>phonydata</artifactId>
-       <version>0.2</version>
+       <version>0.4</version>
     </dependency>
