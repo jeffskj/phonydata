@@ -43,9 +43,13 @@ class GroovyDataSetWriter implements DataSetWriter {
     private String toValue(Object o) {
         switch (o) {
             case Number: return o.toString()
-            case CharSequence: return "\"${StringEscapeUtils.escapeJava(o)}\""
+            case CharSequence: return "\"${sanitize(o)}\""
             case Boolean: return o.toString() 
             case Date: return "new Date(${o.time})"
         }
+    }
+    
+    private String sanitize(String input) {
+        return StringEscapeUtils.escapeJava(input).replace('$', '\\$')
     }
 }
