@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory
 
 
 class GroovyDataSetReader implements DataSetReader {
+    private static final int MAX_SCRIPT_SIZE = 1024 * 60 // leave some headroom to 64k method body limit
+    
     private Logger logger = LoggerFactory.getLogger(getClass())
     
     private InputStream input;
@@ -26,12 +28,29 @@ class GroovyDataSetReader implements DataSetReader {
     }
         
     private Map<String, Table> parse(InputStream input) {
-        GroovyShell shell = new GroovyShell()
-        def script = shell.parse(input.newReader())
         
         def tables = [:]
+        def lines = new LinkedList(input.readLines())
         
-        def getTable = { name ->            
+        while (!lines.empty) {
+            def sb = new StringBuilder()
+            while (!lines.empty && (sb.size() + lines.head().size()) < MAX_SCRIPT_SIZE) {
+                sb.append(lines.head()).append('\n')
+                lines.remove(0)
+            }
+            execScript(sb.toString(), tables)
+        }
+        
+        logger.info ("read groovy dataset with {} tables and {} total rows", tables.size(), tables.values().sum { it.rows.size() })
+        
+        return tables
+    }
+    
+    private void execScript(text, tables) {
+        GroovyShell shell = new GroovyShell()
+        def script = shell.parse(text)
+        
+        def getTable = { name ->
             if (!tables[name]) {
                 tables[name] = new Table(name: name)
             }
@@ -48,9 +67,5 @@ class GroovyDataSetReader implements DataSetReader {
         script.metaClass.propertyMissing = { getTable(it) }
         
         script.run()
-        
-        logger.info ("read groovy dataset with {} tables and {} total rows", tables.size(), tables.values().sum { it.rows.size() })
-        
-        return tables
     }
 }

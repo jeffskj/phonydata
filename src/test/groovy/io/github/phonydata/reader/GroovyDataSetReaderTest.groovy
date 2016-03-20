@@ -46,4 +46,14 @@ address(city:'new york', person:jane)
         assertEquals(2, tables.people.rows.size())
         assertEquals(2, tables.address.rows.size())
     }
+    
+    @Test
+    public void canParseLargeDataset() {
+        def text = (0..5000).collect {
+            def blah = UUID.randomUUID().toString() * 5  
+            "people(name: 'Joe Blow ${it}', city:'seattle', blah:'${blah}')"
+        }.join('\n')
+        
+        def tables = new GroovyDataSetReader(text).read().tables
+    }
 }
